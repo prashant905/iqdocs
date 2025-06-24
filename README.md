@@ -1,245 +1,115 @@
-# 🏥 Medical Document Analysis App
+# 📄 Document Intelligence Hub
 
-A powerful Python application for analyzing medical documents using cutting-edge AI models. Extract structured information from medical PDFs and images with support for multiple AI providers including OpenAI, Google Gemini, and Google's specialized MedGemma model.
+A powerful and streamlined Python application for extracting structured data from medical documents. This tool uses a sophisticated dual-model approach, leveraging both GPT-4o and Gemini 2.5 Flash for comprehensive text extraction, with Gemini handling the final, intelligent synthesis of the results.
 
-![Python](https://img.shields.io/badge/python-v3.8+-blue.svg)
+![Python](https://img.shields.io/badge/python-v3.12+-blue.svg)
 ![Gradio](https://img.shields.io/badge/gradio-web--interface-orange.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
 ## ✨ Features
 
-- 📎 **Multi-format Support**: Upload PDFs, images (JPG, PNG, GIF, BMP, WebP)
-- 🤖 **Multiple AI Models**: 
-  - **OpenAI GPT-4o**: Best-in-class multimodal analysis
-  - **Google Gemini 1.5 Flash**: Fast and efficient processing
-  - **MedGemma-4B**: Google's medical specialist model for local processing
-- 🏥 **Medical Focus**: Specialized prompts for medical document analysis
-- 📋 **Structured Extraction**: Extract specific medical fields with high accuracy
-- 👀 **Visual Preview**: Real-time preview of uploaded documents
-- 🔒 **Privacy Options**: Local processing with MedGemma for sensitive data
-- 🎨 **Modern UI**: Clean, intuitive Gradio web interface
-- ⚡ **System Prompts**: Pre-configured medical expert instructions
+-   📎 **Multi-format Support**: Upload PDFs and all common image types (JPG, PNG, etc.).
+-   🤖 **Dual-Model AI Analysis**: Automatically processes documents with both **OpenAI GPT-4o** and **Google Gemini 2.5 Flash** to capture the most comprehensive data.
+-   🧠 **Intelligent Synthesis**: Uses Gemini 2.5 Flash to intelligently analyze, disambiguate, and merge the outputs from both initial models into a single, accurate report.
+-   📋 **Advanced Field Recognition**: Capable of extracting text from complex, handwritten forms, including checkboxes, ratings, and circled items.
+-   👀 **Visual Preview**: Instantly see a preview of your uploaded documents.
+-   🐛 **Debug Mode**: An optional interface to view the raw text output from each model side-by-side for comparison and troubleshooting.
+-   🎨 **Modern UI**: A clean and intuitive web interface powered by Gradio.
 
 ## 📋 Requirements
 
-- **Python 3.8+** (Python 3.9+ recommended)
-- **8GB+ RAM** (for MedGemma local processing)
-- **Internet connection** (for OpenAI/Gemini APIs)
-- **API Keys** (OpenAI and/or Gemini) or **Hugging Face account** (for MedGemma)
+-   **Python 3.12+**
+-   [Poppler](https://poppler.freedesktop.org/): A PDF rendering library.
+-   An active internet connection.
+-   API keys for OpenAI and Google Gemini.
 
-## 🚀 Quick Setup
+## 🚀 Setup Instructions
 
-### Method 1: Automated Setup (Recommended)
+### Step 1: Clone the Repository
 
 ```bash
-# Clone or download the project
-cd medical-document-analysis
-
-# Run the automated setup script
-./setup.sh
-
-# Set up your API keys
-cp env.example .env
-# Edit .env file with your API keys
-
-# Start the application
-source venv/bin/activate
-python app.py
+git clone <repository-url>
+cd <repository-directory>
 ```
 
-### Method 2: Manual Setup
+### Step 2: Install System Dependencies (Poppler)
 
-Follow the detailed instructions below for complete control over the setup process.
+The application requires `poppler` to convert PDF pages into images.
 
-## 📦 Detailed Installation
-
-### Step 1: Environment Setup
+**On macOS (using Homebrew):**
 
 ```bash
-# Create a virtual environment
-python3 -m venv venv
+brew install poppler
+```
+
+**On Debian/Ubuntu:**
+
+```bash
+sudo apt-get update && sudo apt-get install -y poppler-utils
+```
+
+**On Windows:**
+Follow the instructions from this [stackoverflow guide](https://stackoverflow.com/questions/18381713/how-to-install-poppler-on-windows) to install Poppler and add it to your system's PATH.
+
+### Step 3: Create a Virtual Environment
+
+It is highly recommended to use a virtual environment to manage dependencies.
+
+```bash
+# Create a virtual environment using Python 3.12
+python3.12 -m venv venv-py312
 
 # Activate the virtual environment
 # On macOS/Linux:
-source venv/bin/activate
+source venv-py312/bin/activate
 # On Windows:
-# venv\Scripts\activate
-
-# Upgrade pip
-pip install --upgrade pip
+# venv-py312\Scripts\activate
 ```
 
-### Step 2: Install Dependencies
+### Step 4: Install Python Packages
+
+Install all the required Python libraries using the `requirements.txt` file.
 
 ```bash
-# Install all required packages
 pip install -r requirements.txt
 ```
 
-**Core Dependencies:**
-- `gradio>=4.0.0` - Web interface framework
-- `openai>=1.0.0` - OpenAI API client
-- `google-generativeai>=0.3.0` - Google Gemini API client
-- `transformers>=4.50.0` - Hugging Face transformers (for MedGemma)
-- `torch>=2.0.0` - PyTorch (for local model processing)
-- `Pillow>=9.0.0` - Image processing
-- `PyMuPDF>=1.23.0` - PDF processing
-- `python-dotenv>=1.0.0` - Environment variable management
-- `huggingface_hub>=0.25.0` - Hugging Face model access
-- `accelerate>=0.20.0` - Model optimization
+### Step 5: Configure API Keys
 
-### Step 3: API Key Configuration
+The application loads API keys from a `.env` file in the project root.
 
-#### Option A: Using .env File (Recommended)
+1.  **Create the .env file:**
+    ```bash
+    touch .env
+    ```
 
-```bash
-# Copy the example environment file
-cp env.example .env
+2.  **Add your API keys to the `.env` file:** Open the file in a text editor and add your keys like this:
 
-# Edit the .env file and add your API keys
-nano .env  # or use your preferred editor
-```
-
-Add the following to your `.env` file:
-```env
-# OpenAI API Key (required for OpenAI model)
-OPENAI_API_KEY=your-openai-api-key-here
-
-# Google Gemini API Key (required for Gemini model)
-GEMINI_API_KEY=your-gemini-api-key-here
-```
-
-#### Option B: Environment Variables
-
-```bash
-# Set environment variables directly
-export OPENAI_API_KEY='your-openai-api-key-here'
-export GEMINI_API_KEY='your-gemini-api-key-here'
-```
-
-#### How to Get API Keys
-
-**OpenAI API Key:**
-1. Go to [OpenAI API Keys](https://platform.openai.com/api-keys)
-2. Sign in or create an account
-3. Click "Create new secret key"
-4. Copy the generated key
-
-**Google Gemini API Key:**
-1. Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Sign in with your Google account
-3. Click "Create API Key"
-4. Copy the generated key
-
-### Step 4: MedGemma Setup (Optional)
-
-MedGemma is Google's medical specialist model that runs locally for enhanced privacy.
-
-#### Automated MedGemma Setup
-
-```bash
-# Run the MedGemma setup assistant
-python setup_medgemma.py
-```
-
-This script will guide you through:
-- Installing required packages
-- Hugging Face authentication
-- License acceptance
-- Model access verification
-
-#### Manual MedGemma Setup
-
-```bash
-# 1. Install Hugging Face CLI
-pip install huggingface_hub
-
-# 2. Login to Hugging Face
-huggingface-cli login
-# Enter your Hugging Face token when prompted
-
-# 3. Accept the MedGemma license
-# Visit: https://huggingface.co/google/medgemma-4b-it
-# Click "Agree and access repository"
-
-# 4. Test model access
-python -c "from transformers import AutoTokenizer; print('Testing...'); AutoTokenizer.from_pretrained('google/medgemma-4b-it'); print('✅ MedGemma access successful!')"
-```
-
-**Getting a Hugging Face Token:**
-1. Go to [Hugging Face Settings](https://huggingface.co/settings/tokens)
-2. Click "New token"
-3. Give it a name and select "Read" permissions
-4. Copy the generated token
+    ```env
+    OPENAI_API_KEY="your-openai-api-key-here"
+    GEMINI_API_KEY="your-google-gemini-api-key-here"
+    ```
 
 ## 🎯 Running the Application
 
-```bash
-# Activate the virtual environment
-source venv/bin/activate
+Once the setup is complete, you can start the Gradio web server.
 
-# Start the application
+```bash
+# Make sure your virtual environment is activated
+source venv-py312/bin/activate
+
+# Run the application
 python app.py
-
-# The app will be available at: http://localhost:7860
 ```
 
-**If port 7860 is in use:**
-```bash
-# Run on a different port
-GRADIO_SERVER_PORT=7861 python app.py
-
-# Or kill existing processes
-lsof -ti:7860 | xargs kill -9
-```
+The application will now be running and accessible at a local URL, typically `http://127.0.0.1:7860`.
 
 ## 🎮 How to Use
 
-### Basic Workflow
-
-1. **Upload Documents**: 
-   - Click the file upload area
-   - Select PDF or image files (supports multiple files)
-
-2. **Choose AI Model**:
-   - **OpenAI**: Best for complex analysis, requires API key
-   - **Gemini**: Fast and capable, requires API key
-   - **MedGemma**: Medical specialist, runs locally (requires setup)
-
-3. **Specify Fields to Extract**:
-   ```
-   1. Hospital/Facility Name
-   2. Registration Number/Care Facility ID
-   3. Complete Address
-   4. Email Address
-   5. Phone Number
-   6. Provisional Diagnosis
-   7. Encounter ID & Type
-   8. Emergency Status (Yes/No)
-   ```
-
-4. **Analyze**: Click the "🚀 Analyze" button
-
-5. **Review Results**: View extracted information and document previews
-
-### Medical Field Examples
-
-**Default Fields (Pre-filled):**
-- Hospital/Facility information
-- Registration and contact details
-- Medical diagnoses and encounters
-- Emergency status
-
-**Custom Field Examples:**
-```
-- Patient Demographics (Name, Age, Gender, DOB)
-- Vital Signs (Blood Pressure, Heart Rate, Temperature)
-- Medications (Current medications, Dosages, Frequencies)
-- Test Results (Lab values, Imaging findings)
-- Treatment Plans (Procedures, Follow-up instructions)
-- Provider Information (Doctor names, Specialties, Contact)
-- Insurance Information (Policy numbers, Coverage details)
-```
+1.  **Upload Files**: Drag and drop or click to upload one or more PDF or image files. You will see a preview of the pages.
+2.  **Define Fields**: In the "Fields to Extract" text box, list each piece of information you want the AI to find, with one field per line.
+3.  **Run Analysis**: Click the "🚀 Run AI Analysis" button.
+4.  **Review Results**: The final, synthesized information will appear in the "Final Extracted Fields" box.
 
 ## 🔧 Configuration
 
@@ -254,8 +124,7 @@ SERVER_PORT = 7860
 
 # AI Model Settings
 OPENAI_MODEL = "gpt-4o"
-GEMINI_MODEL = "gemini-1.5-flash"
-MEDGEMMA_MODEL = "google/medgemma-4b-it"
+GEMINI_MODEL = "gemini-2.5-flash"
 
 # Processing Settings
 MAX_TOKENS = 1000
@@ -300,18 +169,15 @@ lsof -ti:7860 | xargs kill -9
 GRADIO_SERVER_PORT=7861 python app.py
 ```
 
-#### 3. MedGemma Loading Issues
+#### 3. Poppler Installation Issues
 ```bash
-# Error: Model not found or access denied
-# Solution: Complete authentication
-python setup_medgemma.py
-
-# Or manually:
-huggingface-cli login
-# Then visit: https://huggingface.co/google/medgemma-4b-it
+# Error: Poppler not found
+# Solution: Install Poppler
+brew install poppler  # macOS
+sudo apt-get update && sudo apt-get install -y poppler-utils  # Debian/Ubuntu
 ```
 
-#### 4. Memory Issues (MedGemma)
+#### 4. Memory Issues
 ```bash
 # Error: CUDA out of memory or insufficient RAM
 # Solution: Close other applications or use smaller model
@@ -357,22 +223,21 @@ python -u app.py
 
 ## 📊 Model Comparison
 
-| Feature | OpenAI GPT-4o | Gemini 1.5 Flash | MedGemma-4B |
-|---------|---------------|-------------------|-------------|
-| **Speed** | Fast | Very Fast | Moderate |
-| **Accuracy** | Excellent | Very Good | Good (Medical) |
-| **Medical Specialization** | General | General | ⭐ Specialized |
-| **Privacy** | Cloud | Cloud | ⭐ Local |
-| **Cost** | Pay per use | Pay per use | ⭐ Free |
-| **Setup Complexity** | Easy | Easy | Moderate |
-| **Internet Required** | Yes | Yes | ⭐ No |
-| **Multimodal** | ⭐ Yes | ⭐ Yes | ⭐ Yes |
+| Feature | OpenAI GPT-4o | Gemini 2.5 Flash |
+|---------|---------------|-------------------|
+| **Speed** | Fast | Very Fast |
+| **Accuracy** | Excellent | Very Good |
+| **Medical Specialization** | General | General |
+| **Privacy** | Cloud | Cloud |
+| **Cost** | Pay per use | Pay per use |
+| **Setup Complexity** | Easy | Easy |
+| **Internet Required** | Yes | Yes |
+| **Multimodal** | ⭐ Yes | ⭐ Yes |
 
 ### When to Use Each Model
 
 - **OpenAI GPT-4o**: Best overall performance, complex analysis
-- **Gemini 1.5 Flash**: Quick processing, cost-effective
-- **MedGemma-4B**: Privacy-sensitive medical data, offline processing
+- **Gemini 2.5 Flash**: Quick processing, cost-effective
 
 ## 🔒 Privacy & Security
 
@@ -382,11 +247,6 @@ python -u app.py
   - Data sent to external APIs
   - Subject to provider privacy policies
   - Not recommended for highly sensitive data
-
-- **Local Model (MedGemma)**:
-  - Processing happens entirely on your machine
-  - No data leaves your system
-  - ⭐ **Recommended for sensitive medical documents**
 
 ### Security Best Practices
 
@@ -407,7 +267,7 @@ python -u app.py
 
 3. **Data Handling**:
    - Clear uploaded files after processing
-   - Use MedGemma for HIPAA-sensitive documents
+   - Use Gemini for HIPAA-sensitive documents
    - Regular security updates
 
 ## 🚀 Advanced Usage
@@ -423,7 +283,7 @@ from app import process_files_and_prompt
 # Process multiple files
 files = ["doc1.pdf", "doc2.jpg", "doc3.png"]
 fields = "Hospital name, Patient ID, Diagnosis"
-model = "MedGemma"  # For privacy
+model = "Gemini"  # For privacy
 
 for file in files:
     result, images = process_files_and_prompt([file], fields, model)
@@ -500,8 +360,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 🙏 Acknowledgments
 
 - **OpenAI** for GPT-4o multimodal capabilities
-- **Google** for Gemini and MedGemma models
-- **Hugging Face** for model hosting and transformers library
+- **Google** for Gemini models
 - **Gradio** for the intuitive web interface
 - **PyMuPDF** for PDF processing capabilities
 
@@ -513,12 +372,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ```bash
 # Setup
-python3 -m venv venv && source venv/bin/activate
+python3.12 -m venv venv-py312 && source venv-py312/bin/activate
 pip install -r requirements.txt
 cp env.example .env  # Add your API keys
-
-# MedGemma Setup
-python setup_medgemma.py
 
 # Run Application
 python app.py
@@ -534,10 +390,9 @@ GRADIO_SERVER_PORT=7861 python app.py  # Use different port
 
 ### Memory Requirements
 - **Minimum**: 4GB RAM
-- **Recommended**: 8GB+ RAM (for MedGemma)
+- **Recommended**: 8GB+ RAM (for Gemini)
 - **Optimal**: 16GB+ RAM (for multiple large documents)
 
 ---
 
-**🎯 Ready to analyze medical documents with AI? Follow the setup guide above and start extracting structured information from your medical files!** 
->>>>>>> 82e2d87 (Initial setup)
+**🎯 Ready to analyze medical documents with AI? Follow the setup guide above and start extracting structured information from your medical files!**

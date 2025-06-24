@@ -62,8 +62,8 @@ def get_medgemma_model():
 
 def call_gpt4(file_paths, progress=gr.Progress()):
     """Call OpenAI API with files (PDFs and images) directly"""
-    system_prompt = "You are an expert medical document analyzer. Your task is to extract ALL text content from the provided documents. Focus on accuracy and completeness, including handwritten notes."
-    user_prompt = """Please extract all text content from these medical documents, including any handwritten notes, printed text, and form fields. Pay special attention to:
+    system_prompt = "You are an expert medical document analyzer. Your task is to  extract ALL  content from the provided documents. Focus on accuracy and completeness, including handwritten notes."
+    user_prompt = """Please extract all content from these medical documents, including any handwritten notes, printed text, and form fields. Pay special attention to:
 
 1. CHECKBOXES & SELECTIONS: Look for checked boxes, circled options, crossed marks, or any visual indicators of selected choices (Yes/No, checkmarks, X marks, etc.)
 2. RATING SCALES: Identify any circled or marked numbers on rating scales (0-10 pain scales, etc.)
@@ -135,24 +135,56 @@ Prioritize accuracy and completeness."""
 def combine_and_refine_text(gpt_text, gemini_text, fields, progress=gr.Progress()):
     """Combine and refine text from both models, then extract specified fields using Gemini."""
     
-    prompt = f"""You are an expert medical document analyzer. Your task is to extract specific fields from the provided text.
+    prompt = f"""You are an AI-powered data specialist with deep expertise in medical documentation. Your task is to act as a meticulous assembler of information from two text sources (PASS 1 and PASS 2).
 
-**CRITICAL INSTRUCTIONS:**
-1.  **Source Text Only**: You MUST only use the text provided in the 'DOCUMENT TEXT' section below. Do not infer, guess, or generate any information that is not explicitly present.
-2.  **No Summarization**: Extract the information verbatim. Do not summarize or rephrase.
-3.  **Handle Missing Information**: If a field cannot be found, you MUST output "Not found" for that field.
-4.  **Synthesize from Multiple Passes**: The 'DOCUMENT TEXT' contains information from multiple analysis passes. You must synthesize this information to form the most complete and accurate answer for each field.
-5.  **Do Not Attribute Sources**: Your final output must be a clean, synthesized result. Do not mention which analysis pass or model was the source of the information.
+For each field you need to extract, follow this two-step process:
 
-**Output Format:**
-- Provide a structured list with clear field names and the extracted values. Do not add any extra commentary.
+**Step 1: Apply Expert Filtering.** 
+Use your expert medical knowledge to identify *only the relevant information* for that field from the source text.
+- *Example:* When asked for "Vitals", you must first scan both Passes and gather only text related to actual vital signs (BP, HR, Temp, RR, SpO2, etc.). You must explicitly **ignore** and discard demographic data like 'Age' or 'Sex' from your consideration for the 'Vitals' field, even if the raw text lists them nearby.
 
-**Fields to Extract:**
+**Step 2: Assemble the Filtered Data.** 
+Once you have a collection of only the relevant text snippets, apply the 'Synthesis & Conflict Resolution Hierarchy' below to assemble them into the final value for the field.
+
+---
+**Synthesis & Conflict Resolution Hierarchy**
+For each field you need to extract, follow these steps in order:
+
+**Step A: Check for Identical Information**
+If PASS 1 and PASS 2 provide the exact same text for a field, you must use the version from PASS 2.
+
+**Step B: Check for a Superior Version**
+If the information is for the same field but one version is clearly more complete or accurate (e.g., "Akola" vs. "Akola, District: Akola"), you must select and use the text from the more comprehensive version.
+
+**Step C: Perform an Intelligent Combination (No Overlap)**
+If each Pass provides unique, non-overlapping information for a field, your task is to combine them.
+- **CRITICAL:** You must merge them logically to create a single, coherent value without duplicating any words.
+- *Example:* If PASS 1 has "Narayan Apartment Flat No. 31" and PASS 2 has "Gurudatta Nagar, Daski Bhuyad", the correct final output is "Narayan Apartment Flat No. 31, Gurudatta Nagar, Daski Bhuyad".
+- *Anti-Example:* If PASS 1 is "Dr. Smith" and PASS 2 is "Dr. Smith, MD", the correct combination is "Dr. Smith, MD", **not** "Dr. Smith, Dr. Smith, MD".
+
+**Step D: Handle True Conflicts**
+If, and only if, the information is for the same field but is fundamentally contradictory (e.g., two completely different phone numbers), you must present both options clearly, labeled by their source pass.
+- *Example:* `Patient Mobile No.: 9975763569 (from PASS 1) / 9772202564 (from PASS 2)`.
+
+**Step E: The "Not Found" Rule**
+Only output "Not found" if, after following all the steps above, no information for the field can be found in either Pass.
+
+---
+**Output Format & Final Rules:**
+- Provide a structured list with clear field names and the extracted values.
+- **CRITICAL:** Do NOT add any extra commentary. Your final output must not contain the words 'GPT', 'Gemini', 'PASS 1', or 'PASS 2'. It should be a clean, final report.
+
+---
+**FIELDS TO EXTRACT:**
 {fields}
 
-**DOCUMENT TEXT:**
-{gpt_text}
 ---
+**DOCUMENT TEXT TO ANALYZE**
+
+=== PASS 1 ===
+{gpt_text}
+
+=== PASS 2 ===
 {gemini_text}
 """
     
@@ -212,16 +244,12 @@ def run_ai_analysis(files, fields, progress=gr.Progress()):
         gpt_text = future_gpt.result()
         gemini_text = future_gemini.result()
 
-    # Debug prints
-    print(f"[DEBUG] GPT-4o text length: {len(gpt_text) if gpt_text else 0}")
-    print(f"[DEBUG] Gemini text length: {len(gemini_text) if gemini_text else 0}")
-    print(f"[DEBUG] Gemini text preview: {gemini_text[:200] if gemini_text else 'None'}")
-
     progress(0.7, desc="Refining extracted text...")
     
     final_result = combine_and_refine_text(gpt_text, gemini_text, fields)
     
     progress(1, desc="Analysis Complete!")
+    # return final_result
     return final_result, gpt_text, gemini_text
 
 # --- Gradio UI ---
@@ -325,5 +353,5 @@ def check_api_keys():
         print("Example .env file:\nOPENAI_API_KEY=your-openai-key-here\nGEMINI_API_KEY=your-gemini-key-here")
 
 if __name__ == "__main__":
-    check_api_keys()
+    # check_api_keys()
     demo.launch(debug=True, show_error=True) 
