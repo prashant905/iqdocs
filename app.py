@@ -256,7 +256,7 @@ def run_ai_analysis(files, fields, progress=gr.Progress()):
 
 with gr.Blocks(theme=gr.themes.Default(primary_hue="blue", secondary_hue="neutral")) as demo:
     gr.Markdown("# 📄 Document Intelligence Hub")
-    gr.Markdown("An all-in-one tool for extracting structured data from your documents using GPT-4 and Gemini, with Gemini 2.5 Flash handling the final synthesis.")
+    gr.Markdown("An all-in-one tool for extracting structured data from your documents using advaneced multi-pass AI.")
     
     with gr.Row():
         with gr.Column(scale=1):
@@ -303,20 +303,21 @@ with gr.Blocks(theme=gr.themes.Default(primary_hue="blue", secondary_hue="neutra
                 interactive=False
             )
             
-            gr.Markdown("### Debug: Individual Model Outputs")
-            with gr.Row():
-                gpt_debug_textbox = gr.Textbox(
-                    label="GPT-4o Raw Output",
-                    lines=10,
-                    show_copy_button=True,
-                    interactive=False
-                )
-                gemini_debug_textbox = gr.Textbox(
-                    label="Gemini 2.5 Flash Raw Output",
-                    lines=10,
-                    show_copy_button=True,
-                    interactive=False
-                )
+            if os.getenv("DEBUG") == "True":
+                gr.Markdown("### Debug: Individual Model Outputs")
+                with gr.Row():
+                    gpt_debug_textbox = gr.Textbox(
+                        label="GPT-4o Raw Output",
+                        lines=10,
+                        show_copy_button=True,
+                        interactive=False
+                    )
+                    gemini_debug_textbox = gr.Textbox(
+                        label="Gemini 2.5 Flash Raw Output",
+                        lines=10,
+                        show_copy_button=True,
+                        interactive=False
+                    )
 
     # --- Event Handlers ---
     
@@ -326,10 +327,14 @@ with gr.Blocks(theme=gr.themes.Default(primary_hue="blue", secondary_hue="neutra
         outputs=[gallery_output]
     )
     
+    ai_submit_outputs = [ai_output_textbox]
+    if os.getenv("DEBUG") == "True":
+        ai_submit_outputs.extend([gpt_debug_textbox, gemini_debug_textbox])
+    
     ai_submit_btn.click(
         fn=run_ai_analysis,
         inputs=[file_upload, fields_input],
-        outputs=[ai_output_textbox, gpt_debug_textbox, gemini_debug_textbox]
+        outputs=ai_submit_outputs
     )
 
 def check_api_keys():
